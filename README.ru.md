@@ -2,6 +2,8 @@
 
 <div align="center">
 
+[![GitHub Release](https://img.shields.io/github/v/release/agb1964/totp-cli?color=blue&logo=github)](https://github.com/agb1964/totp-cli/releases/latest)
+[![GitHub Downloads (latest release)](https://img.shields.io/github/downloads/agb1964/totp-cli/latest/total?color=blue&logo=github)](https://github.com/agb1964/totp-cli/releases/latest)
 [![CI](https://github.com/agb1964/totp-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/agb1964/totp-cli/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-2024%20edition-orange.svg)](https://www.rust-lang.org)
