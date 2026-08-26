@@ -1,0 +1,78 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-release:
+    name: Build release binary for ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            binary_name: totp-cli
+            archive_name: totp-cli-linux-x86_64.tar.gz
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            binary_name: totp-cli
+            archive_name: totp-cli-macos-arm64.tar.gz
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            binary_name: totp-cli.exe
+            archive_name: totp-cli-windows-x86_64.zip
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          targets: ${{ matrix.target }}
+
+      - name: Build binary
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Package (Unix)
+        if: matrix.os != 'windows-latest'
+        run: |
+          tar -czvf ${{ matrix.archive_name }} -C target/${{ matrix.target }}/release ${{ matrix.binary_name }}
+
+      - name: Package (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          7z a ${{ matrix.archive_name }} ./target/${{ matrix.target }}/release/${{ matrix.binary_name }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.archive_name }}
+          path: ${{ matrix.archive_name }}
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: build-release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*/*
+          generate_release_notes: true
